@@ -1,0 +1,89 @@
+diff --git a/setup.py b/setup.py
+index 8253ff6..8dd62fa 100644
+--- a/setup.py
++++ b/setup.py
+@@ -74,6 +74,7 @@ def get_geos_paths():
+             "include_dirs": ["./src", include_dir],
+             "library_dirs": [library_dir],
+             "libraries": ["geos_c"],
++            #"extra_objects": ["libnumpy.a", "libnpyrandom.a", "libnpymath.a", "libgeos.a", "libgeos_c.a"]
+         }
+ 
+     geos_version = get_geos_config("--version")
+@@ -126,14 +127,14 @@ class build_ext(_build_ext):
+         # https://github.com/scikit-hep/root_numpy/pull/292
+ 
+         # Prevent numpy from thinking it is still in its setup process:
+-        try:
+-            del builtins.__NUMPY_SETUP__
+-        except AttributeError:
+-            pass
++        # try:
++        #     del builtins.__NUMPY_SETUP__
++        # except AttributeError:
++        #     pass
+ 
+-        import numpy
++        #import numpy
+ 
+-        self.include_dirs.append(numpy.get_include())
++        #self.include_dirs.append("/Users/prasadmadanayake/Workspace/q4us/sample-ios/build/numpy/x86_64/numpy-1.22.4/build/src.macosx-13.0-arm64-3.9/numpy/core/include")
+ 
+ 
+ ext_modules = []
+@@ -205,12 +206,52 @@ else:
+ 
+ 
+ cmdclass = versioneer.get_cmdclass()
+-cmdclass["build_ext"] = build_ext
+-
++#cmdclass["build_ext"] = build_ext
++
++extra_reqs = {
++    'test': ['pytest', 'pytest-cov'],
++    'vectorized': ['numpy']}
++
++setup_args = dict(
++    name                = 'Shapely',
++    version             = versioneer.get_version(),
++    description         = 'Geometric objects, predicates, and operations',
++    license             = 'BSD',
++    keywords            = 'geometry topology gis',
++    author              = 'Sean Gillies',
++    author_email        = 'sean.gillies@gmail.com',
++    maintainer          = 'Sean Gillies',
++    maintainer_email    = 'sean.gillies@gmail.com',
++    url                 = 'https://github.com/Toblerity/Shapely',
++    long_description    = 'Geometric objects, predicates, and operations',
++    packages            = [
++        'shapely',
++        'shapely.geometry',
++        'shapely.algorithms',
++        'shapely.vectorized',
++    ],
++    classifiers         = [
++        'Development Status :: 5 - Production/Stable',
++        'Intended Audience :: Developers',
++        'Intended Audience :: Science/Research',
++        'License :: OSI Approved :: BSD License',
++        'Operating System :: OS Independent',
++        'Programming Language :: Python :: 3',
++        'Programming Language :: Python :: 3.6',
++        'Programming Language :: Python :: 3.7',
++        'Programming Language :: Python :: 3.8',
++        'Programming Language :: Python :: 3.9',
++        'Programming Language :: Python :: 3.10',
++        'Topic :: Scientific/Engineering :: GIS',
++    ],
++    python_requires    = '>=3.6',
++    extras_require     = extra_reqs
++)
+ 
+ # see pyproject.toml for static project metadata
+ setup(
+-    version=versioneer.get_version(),
++    #version=versioneer.get_version(),
+     ext_modules=ext_modules,
+     cmdclass=cmdclass,
++    **setup_args
+ )

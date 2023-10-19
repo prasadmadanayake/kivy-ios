@@ -1,0 +1,339 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f05adb32da..69cfa47ecd 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -623,9 +623,9 @@ endif()
+ ocv_cmake_hook(POST_CMAKE_BUILD_OPTIONS)
+ 
+ # --- Python Support ---
+-if(NOT IOS)
++#if(NOT IOS)
+   include(cmake/OpenCVDetectPython.cmake)
+-endif()
++#endif()
+ 
+ include(cmake/OpenCVCompilerOptions.cmake)
+ 
+diff --git a/Info.plist b/Info.plist
+new file mode 100644
+index 0000000000..78a638867c
+--- /dev/null
++++ b/Info.plist
+@@ -0,0 +1,26 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
++<plist version="1.0">
++	<dict>
++		<key>CFBundleDevelopmentRegion</key>
++		<string>English</string>
++		<key>CFBundleExecutable</key>
++		<string>{library}</string>
++		<key>CFBundleGetInfoString</key>
++		<string>{bundle_name} {version}</string>
++		<key>CFBundleIdentifier</key>
++		<string>{bundle_id}</string>
++		<key>CFBundleInfoDictionaryVersion</key>
++		<string>6.0</string>
++		<key>CFBundleName</key>
++		<string>{bundle_name}</string>
++		<key>CFBundlePackageType</key>
++		<string>FMWK</string>
++		<key>CFBundleShortVersionString</key>
++		<string>{version}</string>
++		<key>CFBundleVersion</key>
++		<string>{bundle_name} {version}</string>
++		<key>MinimumOSVersion</key>
++		<string>9.0</string>
++	</dict>
++</plist>
+diff --git a/cmake/OpenCVDetectPython.cmake b/cmake/OpenCVDetectPython.cmake
+index 6e7bb18c1b..fa76ce89b8 100644
+--- a/cmake/OpenCVDetectPython.cmake
++++ b/cmake/OpenCVDetectPython.cmake
+@@ -175,7 +175,7 @@ if(NOT ${found})
+       endif()
+     endif()
+ 
+-    if(NOT ANDROID AND NOT IOS)
++    if(NOT ANDROID)
+       if(CMAKE_HOST_UNIX)
+         execute_process(COMMAND ${_executable} -c "from sysconfig import *; print(get_path('purelib'))"
+                         RESULT_VARIABLE _cvpy_process
+diff --git a/modules/core/misc/python/pyopencv_umat.hpp b/modules/core/misc/python/pyopencv_umat.hpp
+index 697adaf202..8fd0f245d2 100644
+--- a/modules/core/misc/python/pyopencv_umat.hpp
++++ b/modules/core/misc/python/pyopencv_umat.hpp
+@@ -7,7 +7,7 @@ typedef std::vector<Range> vector_Range;
+ CV_PY_TO_CLASS(UMat);
+ CV_PY_FROM_CLASS(UMat);
+ 
+-static bool cv_mappable_to(const Ptr<Mat>& src, Ptr<UMat>& dst)
++static bool cv_mappable_to(const cv::Ptr<Mat>& src, cv::Ptr<UMat>& dst)
+ {
+     //dst.reset(new UMat(src->getUMat(ACCESS_RW)));
+     dst.reset(new UMat());
+diff --git a/modules/dnn/misc/python/pyopencv_dnn.hpp b/modules/dnn/misc/python/pyopencv_dnn.hpp
+index d729cd8b97..346b07958f 100644
+--- a/modules/dnn/misc/python/pyopencv_dnn.hpp
++++ b/modules/dnn/misc/python/pyopencv_dnn.hpp
+@@ -117,14 +117,14 @@ public:
+         }
+     }
+ 
+-    static Ptr<dnn::Layer> create(dnn::LayerParams &params)
++    static cv::Ptr<dnn::Layer> create(dnn::LayerParams &params)
+     {
+         std::map<std::string, std::vector<PyObject*> >::iterator it = pyLayers.find(params.type);
+         if (it == pyLayers.end())
+             CV_Error(Error::StsNotImplemented, "Layer with a type \"" + params.type +
+                                                "\" is not implemented");
+         CV_Assert(!it->second.empty());
+-        return Ptr<dnn::Layer>(new pycvLayer(params, it->second.back()));
++        return cv::Ptr<dnn::Layer>(new pycvLayer(params, it->second.back()));
+     }
+ 
+     virtual bool getMemoryShapes(const std::vector<std::vector<int> > &inputs,
+diff --git a/modules/python/CMakeLists.txt b/modules/python/CMakeLists.txt
+index c6a9075224..f1532b3b72 100644
+--- a/modules/python/CMakeLists.txt
++++ b/modules/python/CMakeLists.txt
+@@ -3,7 +3,7 @@
+ # ----------------------------------------------------------------------------
+ if(DEFINED OPENCV_INITIAL_PASS)  # OpenCV build
+ 
+-if(ANDROID OR APPLE_FRAMEWORK OR WINRT)
++if(ANDROID OR WINRT)
+   ocv_module_disable_(python2)
+   ocv_module_disable_(python3)
+   return()
+diff --git a/modules/python/src2/cv2.cpp b/modules/python/src2/cv2.cpp
+index b39db34fcb..258f7b15f8 100644
+--- a/modules/python/src2/cv2.cpp
++++ b/modules/python/src2/cv2.cpp
+@@ -25,16 +25,16 @@ typedef std::vector<int> vector_int;
+ typedef std::vector<float> vector_float;
+ typedef std::vector<double> vector_double;
+ typedef std::vector<size_t> vector_size_t;
+-typedef std::vector<Point> vector_Point;
++typedef std::vector<cv::Point> vector_Point;
+ typedef std::vector<Point2f> vector_Point2f;
+ typedef std::vector<Point3f> vector_Point3f;
+-typedef std::vector<Size> vector_Size;
++typedef std::vector<cv::Size> vector_Size;
+ typedef std::vector<Vec2f> vector_Vec2f;
+ typedef std::vector<Vec3f> vector_Vec3f;
+ typedef std::vector<Vec4f> vector_Vec4f;
+ typedef std::vector<Vec6f> vector_Vec6f;
+ typedef std::vector<Vec4i> vector_Vec4i;
+-typedef std::vector<Rect> vector_Rect;
++typedef std::vector<cv::Rect> vector_Rect;
+ typedef std::vector<Rect2d> vector_Rect2d;
+ typedef std::vector<RotatedRect> vector_RotatedRect;
+ typedef std::vector<KeyPoint> vector_KeyPoint;
+@@ -47,7 +47,7 @@ typedef std::vector<std::string> vector_string;
+ typedef std::vector<Scalar> vector_Scalar;
+ 
+ typedef std::vector<std::vector<char> > vector_vector_char;
+-typedef std::vector<std::vector<Point> > vector_vector_Point;
++typedef std::vector<std::vector<cv::Point> > vector_vector_Point;
+ typedef std::vector<std::vector<Point2f> > vector_vector_Point2f;
+ typedef std::vector<std::vector<Point3f> > vector_vector_Point3f;
+ typedef std::vector<std::vector<DMatch> > vector_vector_DMatch;
+diff --git a/modules/python/src2/cv2_convert.cpp b/modules/python/src2/cv2_convert.cpp
+index eb800b6ad5..77dd8352e8 100644
+--- a/modules/python/src2/cv2_convert.cpp
++++ b/modules/python/src2/cv2_convert.cpp
+@@ -642,7 +642,7 @@ PyObject* pyopencv_from(const std::string& value)
+ // --- Size
+ 
+ template<>
+-bool pyopencv_to(PyObject* obj, Size& sz, const ArgInfo& info)
++bool pyopencv_to(PyObject* obj, cv::Size& sz, const ArgInfo& info)
+ {
+     RefWrapper<int> values[] = {RefWrapper<int>(sz.width),
+                                 RefWrapper<int>(sz.height)};
+@@ -650,7 +650,7 @@ bool pyopencv_to(PyObject* obj, Size& sz, const ArgInfo& info)
+ }
+ 
+ template<>
+-PyObject* pyopencv_from(const Size& sz)
++PyObject* pyopencv_from(const cv::Size& sz)
+ {
+     return Py_BuildValue("(ii)", sz.width, sz.height);
+ }
+@@ -672,7 +672,7 @@ PyObject* pyopencv_from(const Size_<float>& sz)
+ // --- Rect
+ 
+ template<>
+-bool pyopencv_to(PyObject* obj, Rect& r, const ArgInfo& info)
++bool pyopencv_to(PyObject* obj, cv::Rect& r, const ArgInfo& info)
+ {
+     RefWrapper<int> values[] = {RefWrapper<int>(r.x), RefWrapper<int>(r.y),
+                                 RefWrapper<int>(r.width),
+@@ -681,7 +681,7 @@ bool pyopencv_to(PyObject* obj, Rect& r, const ArgInfo& info)
+ }
+ 
+ template<>
+-PyObject* pyopencv_from(const Rect& r)
++PyObject* pyopencv_from(const cv::Rect& r)
+ {
+     return Py_BuildValue("(iiii)", r.x, r.y, r.width, r.height);
+ }
+@@ -787,14 +787,14 @@ PyObject* pyopencv_from(const Range& r)
+ // --- Point
+ 
+ template<>
+-bool pyopencv_to(PyObject* obj, Point& p, const ArgInfo& info)
++bool pyopencv_to(PyObject* obj, cv::Point& p, const ArgInfo& info)
+ {
+     RefWrapper<int> values[] = {RefWrapper<int>(p.x), RefWrapper<int>(p.y)};
+     return parseSequence(obj, values, info);
+ }
+ 
+ template<>
+-PyObject* pyopencv_from(const Point& p)
++PyObject* pyopencv_from(const cv::Point& p)
+ {
+     return Py_BuildValue("(ii)", p.x, p.y);
+ }
+diff --git a/modules/python/src2/gen2.py b/modules/python/src2/gen2.py
+index fbdf5677c4..ae5d402a8e 100755
+--- a/modules/python/src2/gen2.py
++++ b/modules/python/src2/gen2.py
+@@ -24,7 +24,7 @@ gen_template_check_self = Template("""
+         return failmsgp("Incorrect type of self (must be '${name}' or its derivative)");
+     ${pname} _self_ = ${cvt}(self1);
+ """)
+-gen_template_call_constructor_prelude = Template("""new (&(self->v)) Ptr<$cname>(); // init Ptr with placement new
++gen_template_call_constructor_prelude = Template("""new (&(self->v)) cv::Ptr<$cname>(); // init Ptr with placement new
+         if(self) """)
+ 
+ gen_template_call_constructor = Template("""self->v.reset(new ${cname}${py_args})""")
+@@ -364,7 +364,7 @@ class ClassInfo(object):
+         return "CVPY_TYPE({}, {}, {}, {}, {}, {});\n".format(
+             self.wname,
+             self.name,
+-            self.cname if self.issimple else "Ptr<{}>".format(self.cname),
++            self.cname if self.issimple else "cv::Ptr<{}>".format(self.cname),
+             self.sname if self.issimple else "Ptr",
+             baseptr,
+             constructor_name
+@@ -373,7 +373,7 @@ class ClassInfo(object):
+ 
+ def handle_ptr(tp):
+     if tp.startswith('Ptr_'):
+-        tp = 'Ptr<' + "::".join(tp.split('_')[1:]) + '>'
++        tp = 'cv::Ptr<' + "::".join(tp.split('_')[1:]) + '>'
+     return tp
+ 
+ 
+@@ -631,8 +631,8 @@ class FuncInfo(object):
+                 if not self.is_static:
+                     code += gen_template_check_self.substitute(
+                         name=selfinfo.name,
+-                        cname=selfinfo.cname if selfinfo.issimple else "Ptr<{}>".format(selfinfo.cname),
+-                        pname=(selfinfo.cname + '*') if selfinfo.issimple else "Ptr<{}>".format(selfinfo.cname),
++                        cname=selfinfo.cname if selfinfo.issimple else "cv::Ptr<{}>".format(selfinfo.cname),
++                        pname=(selfinfo.cname + '*') if selfinfo.issimple else "cv::Ptr<{}>".format(selfinfo.cname),
+                         cvt='' if selfinfo.issimple else '*'
+                     )
+                 fullname = selfinfo.wname + "." + fullname
+@@ -737,7 +737,11 @@ class FuncInfo(object):
+                 code_prelude = ""
+                 code_fcall = ""
+                 if v.rettype:
+-                    code_decl += "    " + v.rettype + " retval;\n"
++                    type = v.rettype.strip()
++                    if type.startswith("Ptr<") or type.startswith("Point") or type.startswith("Size") or type.startswith("Rect"):
++                        code_decl += "    cv::" + type + " retval;\n"
++                    else:
++                        code_decl += "    " + v.rettype + " retval;\n"
+                     code_fcall += "retval = "
+                 if not v.isphantom and ismethod and not self.is_static:
+                     code_fcall += "_self_->" + self.cname
+@@ -1038,9 +1042,34 @@ class PythonWrapperGenerator(object):
+         code += "CV_PY_FROM_ENUM({0});\nCV_PY_TO_ENUM({0});\n\n".format(wname)
+         self.code_enums.write(code)
+ 
++    def addNs(self, line):
++        words = []
++        for word in line.split():
++            if word.startswith("Point") or word.startswith("Ptr<") or word.startswith("Size") or word.startswith("Rect"):
++                words.append("{}::{}".format("cv", word))
++            elif "=Size(" in word:
++                words.append(word.replace("=Size(", "=cv::Size("))
++            elif "=Point(" in word:
++                words.append(word.replace("=Point(", "=cv::Point("))
++            elif "=Ptr<" in word:
++                words.append(word.replace("=Ptr<", "=cv::Ptr<"))
++            elif "<Ptr<" in word:
++                words.append(word.replace("<Ptr<", "<cv::Ptr<"))
++            else:
++                words.append(word)
++        return " ".join(words)
++
+     def save(self, path, name, buf):
+-        with open(path + "/" + name, "wt") as f:
+-            f.write(buf.getvalue())
++
++        lines = []
++        newStr = buf.getvalue().replace("<Point>", "<cv::Point>").replace("<Ptr>","<cv::Ptr>").replace("<Size>", "<cv::Size>").replace("<Rect>", "<cv::Rect>")
++
++        for line in newStr.splitlines():
++            lines.append(self.addNs(line))
++
++        with open(path + "/" + name, "wt") as fs:
++            fs.write("\n".join(lines))
++
+ 
+     def save_json(self, path, name, value):
+         import json
+@@ -1132,7 +1161,7 @@ class PythonWrapperGenerator(object):
+                                           for mappable in classinfo.mappables])
+                 code = gen_template_type_decl.substitute(
+                     name=classinfo.name,
+-                    cname=classinfo.cname if classinfo.issimple else "Ptr<{}>".format(classinfo.cname),
++                    cname=classinfo.cname if classinfo.issimple else "cv::Ptr<{}>".format(classinfo.cname),
+                     mappable_code=mappable_code
+                 )
+                 self.code_types.write(code)
+diff --git a/modules/python/src2/pycompat.hpp b/modules/python/src2/pycompat.hpp
+index 03379ec956..536d858175 100644
+--- a/modules/python/src2/pycompat.hpp
++++ b/modules/python/src2/pycompat.hpp
+@@ -107,7 +107,7 @@ bool pyopencv_to(PyObject* dst, TYPE& src, const ArgInfo& info)
+ {                                                                                                     \
+     if (!dst || dst == Py_None)                                                                       \
+         return true;                                                                                  \
+-    Ptr<TYPE> ptr;                                                                                    \
++    cv::Ptr<TYPE> ptr;                                                                                    \
+                                                                                                       \
+     if (!pyopencv_to(dst, ptr, info)) return false;                                                   \
+     src = *ptr;                                                                                       \
+@@ -118,7 +118,7 @@ bool pyopencv_to(PyObject* dst, TYPE& src, const ArgInfo& info)
+ template<>                                                                                            \
+ PyObject* pyopencv_from(const TYPE& src)                                                              \
+ {                                                                                                     \
+-    Ptr<TYPE> ptr(new TYPE());                                                                        \
++    cv::Ptr<TYPE> ptr(new TYPE());                                                                        \
+                                                                                                       \
+     *ptr = src;                                                                                       \
+     return pyopencv_from(ptr);                                                                        \
+@@ -130,7 +130,7 @@ bool pyopencv_to(PyObject* dst, TYPE*& src, const ArgInfo& info)
+ {                                                                                                     \
+     if (!dst || dst == Py_None)                                                                       \
+         return true;                                                                                  \
+-    Ptr<TYPE> ptr;                                                                                    \
++    cv::Ptr<TYPE> ptr;                                                                                    \
+                                                                                                       \
+     if (!pyopencv_to(dst, ptr, info)) return false;                                                   \
+     src = ptr;                                                                                        \
+@@ -140,7 +140,7 @@ bool pyopencv_to(PyObject* dst, TYPE*& src, const ArgInfo& info)
+ #define CV_PY_FROM_CLASS_PTR(TYPE)                                                                    \
+ static PyObject* pyopencv_from(TYPE*& src)                                                            \
+ {                                                                                                     \
+-    return pyopencv_from(Ptr<TYPE>(src));                                                             \
++    return pyopencv_from(cv::Ptr<TYPE>(src));                                                             \
+ }
+ 
+ #define CV_PY_TO_ENUM(TYPE)                                                                           \

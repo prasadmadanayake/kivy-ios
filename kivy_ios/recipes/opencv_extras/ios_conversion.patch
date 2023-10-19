@@ -1,0 +1,52 @@
+diff --git a/modules/mcc/misc/python/pyopencv_cchecker.hpp b/modules/mcc/misc/python/pyopencv_cchecker.hpp
+index ff9cdac1..16491d5f 100644
+--- a/modules/mcc/misc/python/pyopencv_cchecker.hpp
++++ b/modules/mcc/misc/python/pyopencv_cchecker.hpp
+@@ -1,15 +1,15 @@
+ #include "opencv2/mcc.hpp"
+ 
+ template <>
+-struct pyopencvVecConverter<Ptr<mcc::CChecker>>
++struct pyopencvVecConverter<cv::Ptr<mcc::CChecker>>
+ {
+-    static bool to(PyObject *obj, std::vector<Ptr<mcc::CChecker>> &value,
++    static bool to(PyObject *obj, std::vector<cv::Ptr<mcc::CChecker>> &value,
+                    const ArgInfo &info)
+     {
+         return pyopencv_to_generic_vec(obj, value, info);
+     }
+ 
+-    static PyObject *from(const std::vector<Ptr<mcc::CChecker>> &value)
++    static PyObject *from(const std::vector<cv::Ptr<mcc::CChecker>> &value)
+     {
+         return pyopencv_from_generic_vec(value);
+     }
+diff --git a/modules/rgbd/misc/python/pyopencv_linemod.hpp b/modules/rgbd/misc/python/pyopencv_linemod.hpp
+index ccd4b157..fe25abdc 100644
+--- a/modules/rgbd/misc/python/pyopencv_linemod.hpp
++++ b/modules/rgbd/misc/python/pyopencv_linemod.hpp
+@@ -40,14 +40,14 @@ template<> struct pyopencvVecConverter<linemod::Feature>
+     }
+ };
+ 
+-template<> struct pyopencvVecConverter<Ptr<linemod::Modality> >
++template<> struct pyopencvVecConverter<cv::Ptr<linemod::Modality> >
+ {
+-    static bool to(PyObject* obj, std::vector<Ptr<linemod::Modality> >& value, const ArgInfo& info)
++    static bool to(PyObject* obj, std::vector<cv::Ptr<linemod::Modality> >& value, const ArgInfo& info)
+     {
+         return pyopencv_to_generic_vec(obj, value, info);
+     }
+ 
+-    static PyObject* from(const std::vector<Ptr<linemod::Modality> >& value)
++    static PyObject* from(const std::vector<cv::Ptr<linemod::Modality> >& value)
+     {
+         return pyopencv_from_generic_vec(value);
+     }
+@@ -56,5 +56,5 @@ template<> struct pyopencvVecConverter<Ptr<linemod::Modality> >
+ typedef std::vector<linemod::Match> vector_Match;
+ typedef std::vector<linemod::Template> vector_Template;
+ typedef std::vector<linemod::Feature> vector_Feature;
+-typedef std::vector<Ptr<linemod::Modality> > vector_Ptr_Modality;
++typedef std::vector<cv::Ptr<linemod::Modality> > vector_Ptr_Modality;
+ #endif

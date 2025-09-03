@@ -3,7 +3,7 @@ import sh
 
 
 class LibffiRecipe(Recipe):
-    version = "3.4.4"
+    version = "3.4.8"
     url = "https://github.com/libffi/libffi/releases/download/v{version}/libffi-{version}.tar.gz"
     library = "build/Release-{plat.sdk}/libffi.a"
     include_per_platform = True
@@ -14,13 +14,22 @@ class LibffiRecipe(Recipe):
         if self.has_marker("patched"):
             return
         self.apply_patch("enable-tramp-build.patch")
+        self.apply_patch("disable-armv7-xcodeproj.patch")
         shprint(sh.sed,
                 "-i.bak",
                 "s/-miphoneos-version-min=7.0/-miphoneos-version-min=9.0/g",
                 "generate-darwin-source-and-headers.py")
         shprint(sh.sed,
                 "-i.bak",
+                "s/build_target(ios_device_armv7_platform, platform_headers)/print('skipping armv7')/g",
+                "generate-darwin-source-and-headers.py")
+        shprint(sh.sed,
+                "-i.bak",
                 "s/build_target(ios_simulator_i386_platform, platform_headers)/print('Skipping i386')/g",
+                "generate-darwin-source-and-headers.py")
+        shprint(sh.sed,
+                "-i.bak",
+                "s/ -fembed-bitcode//g",
                 "generate-darwin-source-and-headers.py")
         self.set_marker("patched")
 
@@ -30,7 +39,6 @@ class LibffiRecipe(Recipe):
         shprint(sh.xcodebuild, self.ctx.concurrent_xcodebuild,
                 "ONLY_ACTIVE_ARCH=NO",
                 "ARCHS={}".format(plat.arch),
-                "BITCODE_GENERATION_MODE=bitcode",
                 "-sdk", plat.sdk,
                 "-project", "libffi.xcodeproj",
                 "-target", "libffi-iOS",

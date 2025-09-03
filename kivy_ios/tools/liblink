@@ -23,6 +23,10 @@ while i < len(sys.argv):
         libs.append(opt)
         continue
 
+    if opt.startswith("-F"):
+        libs.append(opt)
+        continue
+
     if opt in ("-r", "-pipe", "-no-cpp-precomp"):
         continue
 
@@ -58,6 +62,9 @@ while i < len(sys.argv):
     if opt.startswith("-W"):
         continue
 
+    if opt.startswith("-stdlib="):
+        continue
+
     if opt.startswith("-"):
         print(sys.argv)
         print("Unknown option: ", opt)
@@ -81,14 +88,23 @@ ld = environ.get('ARM_LD')
 arch = environ.get('ARCH', 'arm64')
 sdk = environ.get('PLATFORM_SDK', 'iphoneos')
 if sdk == 'iphoneos':
-    min_version_flag = '-ios_version_min'
+    platform_version_name = 'ios'
 elif sdk == 'iphonesimulator':
-    min_version_flag = '-ios_simulator_version_min'
+    platform_version_name = 'ios-simulator'
 else:
     raise ValueError("Unsupported SDK: {}".format(sdk))
-call = [ld, '-r', '-o', output + '.o', min_version_flag, '9.0', '-arch', arch]
-if min_version_flag == "-ios_version_min":
-    call += ["-bitcode_bundle"]
+call = [
+    ld,
+    "-r",
+    "-o",
+    output + ".o",
+    "-platform_version",
+    platform_version_name,
+    "9.0",
+    "9.0",
+    "-arch",
+    arch,
+]
 call += objects
 print("Linking: {}".format(" ".join(call)))
 subprocess.call(call)

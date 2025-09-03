@@ -10,11 +10,18 @@ class LibSDL2TTFRecipe(Recipe):
     include_dir = "SDL_ttf.h"
     depends = ["libpng", "sdl2"]
 
+    def prebuild_platform(self, plat):
+        if self.has_marker("patched"):
+            return
+
+        self.apply_patch("harfbuzz.patch")
+
+        self.set_marker("patched")
+
     def build_platform(self, plat):
         shprint(sh.xcodebuild, self.ctx.concurrent_xcodebuild,
                 "ONLY_ACTIVE_ARCH=NO",
                 "ARCHS={}".format(plat.arch),
-                "BITCODE_GENERATION_MODE=bitcode",
                 "GENERATE_MASTER_OBJECT_FILE=YES",
                 "HEADER_SEARCH_PATHS={sdl_include_dir} {libpng_include_dir}".format(
                     sdl_include_dir=join(self.ctx.include_dir, "common", "sdl2"),

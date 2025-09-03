@@ -38,6 +38,10 @@ int main(int argc, char *argv[]) {
     putenv("KIVY_AUDIO=sdl2");
     putenv("KIVY_GL_BACKEND=sdl2");
 
+    // WIP_ Will move to angle and sdl3 as default in the future
+    // Set KIVY_GL_BACKEND=angle if building for kivy==master branch
+    // putenv("KIVY_GL_BACKEND=angle");
+
     // IOS_IS_WINDOWED=True disables fullscreen and then statusbar is shown
     putenv("IOS_IS_WINDOWED=False");
 
@@ -52,7 +56,7 @@ int main(int argc, char *argv[]) {
     NSString *python_home = [NSString stringWithFormat:@"PYTHONHOME=%@", resourcePath, nil];
     putenv((char *)[python_home UTF8String]);
 
-    NSString *python_path = [NSString stringWithFormat:@"PYTHONPATH=%@:%@/lib/python3.10/:%@/lib/python3.10/site-packages:.", resourcePath, resourcePath, resourcePath, nil];
+    NSString *python_path = [NSString stringWithFormat:@"PYTHONPATH=%@:%@/lib/python3.11/:%@/lib/python3.11/site-packages:.", resourcePath, resourcePath, resourcePath, nil];
     putenv((char *)[python_path UTF8String]);
 
     NSString *tmp_path = [NSString stringWithFormat:@"TMP=%@/tmp", resourcePath, nil];

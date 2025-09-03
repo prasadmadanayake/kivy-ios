@@ -3,7 +3,7 @@ import sh
 
 
 class LibSDL2MixerRecipe(Recipe):
-    version = "2.6.2"
+    version = "2.6.3"
     url = "https://github.com/libsdl-org/SDL_mixer/releases/download/release-{version}/SDL2_mixer-{version}.tar.gz"
     library = "Xcode/build/Release-{plat.sdk}/libSDL2_mixer.a"
     include_dir = "include/SDL_mixer.h"
@@ -18,7 +18,6 @@ class LibSDL2MixerRecipe(Recipe):
         shprint(sh.xcodebuild, self.ctx.concurrent_xcodebuild,
                 "ONLY_ACTIVE_ARCH=NO",
                 "ARCHS={}".format(plat.arch),
-                "BITCODE_GENERATION_MODE=bitcode",
                 "HEADER_SEARCH_PATHS=$HEADER_SEARCH_PATHS /usr/include/machine {} ".format(" ".join(plat.include_dirs)),
                 "-sdk", plat.sdk,
                 "-project", "Xcode/SDL_mixer.xcodeproj",

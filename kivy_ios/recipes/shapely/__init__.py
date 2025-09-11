@@ -10,7 +10,7 @@ from kivy_ios.toolchain import CythonRecipe, shprint
 
 
 class NewShapely2(CythonRecipe):
-    version = "2.0.1"
+    version = "2.0.2"
     url = "https://github.com/shapely/shapely/archive/refs/tags/{version}.zip"
     library = "libshapely.a"
     depends = ["python", "geos-ios", "numpy"]
@@ -58,13 +58,16 @@ class NewShapely2(CythonRecipe):
         env['OTHER_CFLAGS'] = env['OTHER_CFLAGS'].replace(arch_inc, python_include_numpy)
         env['CFLAGS'] = env['CFLAGS'].replace(common_inc, python_include_numpy)
         env['OTHER_CFLAGS'] = env['OTHER_CFLAGS'].replace(common_inc, python_include_numpy)
+        env.pop('CXX',None)
 
         return env
 
     def install(self):
+        print("****************************************************************************")
+        print(self.ctx.site_packages_dir)
+        print("****************************************************************************")
         hostpython = sh.Command(self.ctx.hostpython)
-        dest_dir = join(self.ctx.dist_dir, "root", "python")
-        shprint(hostpython, "setup.py", "install", "--prefix", dest_dir)
+        #shprint(hostpython, "setup.py", "install", "--prefix", self.ctx.site_packages_dir)
         self.install_python_package(is_dir=False)
 
 

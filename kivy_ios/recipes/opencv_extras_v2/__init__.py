@@ -1,7 +1,7 @@
 
 from kivy_ios.toolchain import Recipe
 
-class OpenCVExtrasRecipe(Recipe):
+class OpenCVExtrasRecipeV2(Recipe):
     """
     OpenCV extras recipe allows us to build extra modules from the
     `opencv_contrib` repository. It depends on opencv recipe and all the build
@@ -11,7 +11,7 @@ class OpenCVExtrasRecipe(Recipe):
         maybe included in opencv future releases and removed from extras.
     .. seealso:: https://github.com/opencv/opencv_contrib
     """
-    version = '4.5.5'
+    version = '4.12.0'
     url = 'https://github.com/opencv/opencv_contrib/archive/{version}.zip'
 
     def prebuild_platform(self, plat):
@@ -21,4 +21,4 @@ class OpenCVExtrasRecipe(Recipe):
         self.set_marker("patched")
 
 
-recipe = OpenCVExtrasRecipe()
+recipe = OpenCVExtrasRecipeV2()

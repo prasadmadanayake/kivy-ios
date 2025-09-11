@@ -609,7 +609,7 @@ index 7d9f75063c..dbb3e6148d 100755
 +        "CMakeFiles/opencv_python3.dir/__/src2/cv2_highgui.cpp.o"
 +    ]
 +
-+    cmd = ["libtool", "-static", "-o", "../../lib/python3/cv2.a"] + cv2_objs + cv_libs + external_libs
++    cmd = ["libtool", "-static", "-o", "../../lib/python3/cv2.python3.a"] + cv2_objs + cv_libs + external_libs
 +    new_line = " ".join(shlex.quote(x) for x in cmd)
 +    link.write_text(new_line + "\n", encoding="utf-8")
 +

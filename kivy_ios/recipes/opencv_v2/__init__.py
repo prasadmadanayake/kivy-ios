@@ -1,8 +1,9 @@
 # pure-python package, this can be removed when we'll support any python package
 import glob
-import shutil
+import shutil, os, shlex
 from os import listdir
 from os.path import join
+from pathlib import Path
 
 import sh
 
@@ -36,7 +37,6 @@ class OpenCV_V2(Recipe):
         self.set_marker("patched")
 
     def build_platform(self, plat):
-
         opencv_extras_dir = self.get_recipe(
             'opencv_extras_v2', self.ctx).get_build_dir(plat)
         opencv_extras = [
@@ -166,6 +166,23 @@ class OpenCV_V2(Recipe):
             #     )
             #     fs.write(linker_args)
             shprint(sh.make, self.ctx.concurrent_make,)
+
+    def postbuild_platform(self, plat):
+        output_dir = join(self.get_build_dir(plat), "build_xcframework")
+        cv_libs = sorted(str(p.resolve()) for p in Path(os.path.join(output_dir, "lib")).glob("*.a"))
+        external_libs = sorted(str(p.resolve()) for p in Path(os.path.join(output_dir, "3rdparty/lib")).glob("*.a"))
+        cv_dir = join(output_dir,"modules/python3/CMakeFiles/opencv_python3.dir/__/src2")
+        cv2_objs = [
+            join(cv_dir, "cv2.cpp.o"),
+            join(cv_dir, "cv2_util.cpp.o"),
+            join(cv_dir, "cv2_numpy.cpp.o"),
+            join(cv_dir, "cv2_convert.cpp.o"),
+            join(cv_dir, "cv2_highgui.cpp.o")
+        ]
+
+        cmd = ["-static", "-o", join(output_dir, "lib/python3/cv2.a")] + cv2_objs + cv_libs + external_libs
+        shprint(sh.libtool, *cmd)
+        pass
 
     @cache_execution
     def install_sources(self):
